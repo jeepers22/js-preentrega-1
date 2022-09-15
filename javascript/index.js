@@ -59,17 +59,17 @@ class Producto {
 
 
 /* ================ DECLARACIÓN FUNCIONES ================ */
+validarLogin = (userLogin, passLogin) => usuarios.some((usuario) => (usuario.user === userLogin && usuario.password === passLogin))
 
+usuarioExistente = (userAlta) => usuarios.some((usuario) => usuario.user === userAlta)
+
+productoExistente = (tipoProdAlta, marcaAlta) => productos.some((producto) => producto.tipoProd === tipoProdAlta && producto.marca === marcaAlta)
 
 function obtenerUsuarioPorTeclado() {
     let usuario = prompt ("Ingrese su usuario: \n")
     let password = prompt ("Ingrese contraseña: \n")
     return new Usuario(usuario, password, false)
 }
-
-validarLogin = (userLogin, passLogin) => usuarios.some((usuario) => (usuario.user === userLogin && usuario.password === passLogin))
-
-usuarioExistente = (userAlta) => usuarios.some((usuario) => usuario.user === userAlta)
 
 function obtenerProductoPorTeclado() {
     let tipoProd = prompt("Ingrese tipo de producto: ")
@@ -88,11 +88,32 @@ function mostrarObjetoEnTexto(objeto) {
     }
 }
 
-menuPrincipal = () => parseInt(prompt("Bienvenido, ingrese la opción deseada: \n\n1.  Login\n2.  Registrarme\n3.  Salir\n"))
+menuPrincipal = () => parseInt(prompt("Ingrese la opción deseada: \n\n1.  Login\n2.  Registrarme\n3.  Salir\n"))
 
 menuAdmin = (userLogin) => parseInt(prompt(`Bienvenido, ${userLogin} ingrese la opción deseada: \n\n1.  Alta Producto\n2.  Modificar Producto\n3.  Eliminar Producto\n4.  Salir\n`))
 
 menuCompra = (userLogin) => parseInt(prompt(`Bienvenido ${userLogin}, escoja el producto que desea comprar: \n\n` + mostrarCatalogoProductos()))
+
+menuUpdate = () => parseInt(prompt(`Indique el campo que desea modificar: \n\n` + mostrarAtributosProd()))
+
+function showMenu(menu, userLogin) {
+    switch (menu) {
+        case "menuPrincipal":
+            return menuPrincipal()
+            break
+        case "menuAdmin":
+            return menuAdmin(userLogin)
+            break
+        case "menuUpdate":
+            return menuUpdate()
+            break
+        case "menuCompra":
+            return menuCompra(userLogin)
+            break
+        default:
+            alert("Error - No se ha podido carga el menú solicitado")
+    }
+}
 
 function mostrarCatalogoProductos() {
     let option = 1
@@ -103,7 +124,38 @@ function mostrarCatalogoProductos() {
 }
 
 function desplegarProcedimientoAdmin(userLogin) {
-    menuAdmin(userLogin)
+    let repeatAdmin = false
+    let eleccionMenuProductos = 0
+    let eleccionMenuCompra = 0
+
+    while (true) {
+        switch(showMenu("menuAdmin", userLogin)) {
+            case 1:
+                let objectProducto = obtenerProductoPorTeclado()
+                if (!productoExistente(objectProducto.tipoProd, objectProducto.marca)) {
+                    objectProducto.concretarAltaProducto()
+                    alert("Alta de producto exitosa")
+                    repeatAdmin = true
+                }
+                else {
+                    alert("Alta fallida - Producto existente en catálogo")
+                    repeatAdmin = true
+                }
+                break
+            case 2:
+                break
+            case 3:
+                break
+            case 4:  // SALIR
+            repeatAdmin = false
+                break
+            default:
+                alert("Opción incorrecta")
+        }
+        if (!repeatAdmin) {
+            break
+        }
+    }
 }
 
 function desplegarProcedimientoCompra(userLogin) {
@@ -119,7 +171,7 @@ function desplegarProcedimientoCompra(userLogin) {
         salirMenuCompra = productos.length + 1
 
         while (true) { // itera hasta que la opción ingresada sea válida
-            eleccionMenuCompra = menuCompra(userLogin)
+            eleccionMenuCompra = showMenu("menuCompra", userLogin)
             if (eleccionMenuCompra > 0 && eleccionMenuCompra <= salirMenuCompra) {
                 break
             }
@@ -197,6 +249,7 @@ function main() {
                 if (!usuarioExistente(objectUser.user)) {
                     objectUser.concretarAltaUsuario()
                     alert("Usuario registrado con éxito")
+                    repeat = true
                 }
                 else {
                     alert("Alta fallida - Usuario registrado previamente")
@@ -208,6 +261,7 @@ function main() {
                 break
             default:
                 alert("Opción incorrecta")
+                repeat = true
         }
         if (!repeat) {
             break
